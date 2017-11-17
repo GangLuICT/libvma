@@ -60,6 +60,8 @@
 #define BYTE_TO_KB(byte_value)		((byte_value) / 125)
 #define KB_TO_BYTE(kbit_value)		((kbit_value) * 125)
 
+#define NOTIFY_ON_EVENTS(context, events) context->set_events(events)
+
 struct buff_info_t {
 		buff_info_t(){
 			rx_reuse.set_id("buff_info_t (%p) : rx_reuse", this);
@@ -531,11 +533,5 @@ protected:
     }
     //////////////////////////////////////////////////////////////////
 };
-
-#ifdef DEFINED_SOCKETXTREME
-#define NOTIFY_ON_EVENTS(context, events) context->set_events(events)
-#else
-#define NOTIFY_ON_EVENTS(context, events) context->notify_epoll_context((uint32_t)events)
-#endif // DEFINED_SOCKETXTREME
 
 #endif /* BASE_SOCKINFO_H */
