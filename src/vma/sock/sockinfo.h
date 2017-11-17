@@ -140,10 +140,9 @@ public:
 #ifdef DEFINED_SOCKETXTREME
 	virtual bool check_rings() {return m_p_rx_ring ? true: false;}
 #else
-	virtual bool check_rings() {return true;}
+        virtual bool check_rings() {return true;}
+#endif /* DEFINED_SOCKETXTREME */
 	virtual void statistics_print(vlog_levels_t log_level = VLOG_DEBUG);
-#endif
-
 protected:
 	bool			m_b_closed;
 	bool 			m_b_blocking;
