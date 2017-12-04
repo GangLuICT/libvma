@@ -48,7 +48,7 @@
 
 #include <stdint.h>
 #include <unistd.h>
-#ifdef DEFINED_SOCKETXTREME
+
 #include "utils/rdtsc.h"
 #define __STDC_FORMAT_MACROS
 #include <inttypes.h>
@@ -96,9 +96,7 @@ typedef struct instr_info {
 extern uint16_t g_rdtsc_cost;
 extern char g_rdtsc_flow_names[RDTSC_FLOW_MAX][256];
 extern instr_info g_rdtsc_instr_info_arr[RDTSC_FLOW_MAX];
-
 #endif //RDTS_MEASURE
-#endif // DEFINED_SOCKETXTREME
 
 //#define VMA_TIME_MEASURE 1
 #ifdef VMA_TIME_MEASURE
