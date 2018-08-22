@@ -34,7 +34,6 @@
 #if defined(HAVE_INFINIBAND_MLX5_HW_H)
 
 #include <sys/mman.h>
-#include "vma/hw/mlx5/wqe.h"
 #include "cq_mgr_mlx5.h"
 #include "vma/util/utils.h"
 #include "vlogger/vlogger.h"

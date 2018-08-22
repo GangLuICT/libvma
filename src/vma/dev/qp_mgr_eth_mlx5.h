@@ -42,6 +42,23 @@
 
 #include <infiniband/mlx5_hw.h>
 
+#if !defined(MLX5_ETH_INLINE_HEADER_SIZE)
+#define MLX5_ETH_INLINE_HEADER_SIZE 18
+#endif
+
+#define OCTOWORD	16
+#define WQEBB		64
+
+
+struct mlx5_wqe64 {
+	union {
+		struct mlx5_wqe_ctrl_seg ctrl;
+		uint32_t data[4];
+	} ctrl;
+	struct mlx5_wqe_eth_seg eseg;
+	struct mlx5_wqe_data_seg dseg;
+};
+
 class qp_mgr_eth_mlx5 : public qp_mgr_eth
 {
 friend class cq_mgr_mlx5;
