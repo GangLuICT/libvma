@@ -38,9 +38,7 @@
 #include "vma/util/sg_array.h"
 #include "vma/dev/dm_mgr.h"
 
-#if defined(HAVE_INFINIBAND_MLX5_HW_H)
-
-#include <infiniband/mlx5_hw.h>
+#if defined(DEFINED_DIRECT_VERBS)
 
 #if !defined(MLX5_ETH_INLINE_HEADER_SIZE)
 #define MLX5_ETH_INLINE_HEADER_SIZE 18
@@ -105,5 +103,5 @@ private:
 	dm_mgr              m_dm_mgr;
 	bool                m_dm_enabled;
 };
-#endif //defined(HAVE_INFINIBAND_MLX5_HW_H)
+#endif //defined(DEFINED_DIRECT_VERBS)
 #endif //QP_MGR_ETH_MLX5_H
