@@ -157,10 +157,14 @@ libvma_la_SOURCES := \
 	util/wakeup_pipe.cpp \
 	util/match.cpp \
 	util/utils.cpp \
-	util/verbs_extra.cpp \
 	util/instrumentation.cpp \
 	util/sys_vars.cpp \
 	util/agent.cpp \
+	\
+	ib/base/verbs_extra.cpp \
+	ib/mlx5/ib_mlx5.cpp \
+	ib/mlx5/ib_mlx5_hw.cpp \
+	ib/mlx5/ib_mlx5_dv.cpp \
 	\
 	libvma.c \
 	main.cpp \
@@ -292,7 +296,6 @@ libvma_la_SOURCES := \
 	util/to_str.h \
 	util/utils.h \
 	util/valgrind.h \
-	util/verbs_extra.h \
 	util/vma_list.h \
 	util/vma_stats.h \
 	util/vtypes.h \
@@ -300,6 +303,11 @@ libvma_la_SOURCES := \
 	util/wakeup_pipe.h \
 	util/agent.h \
 	util/agent_def.h \
+	\
+	ib/base/verbs_extra.h \
+	ib/mlx5/ib_mlx5.h \
+	ib/mlx5/ib_mlx5_hw.h \
+	ib/mlx5/ib_mlx5_dv.h \
 	\
 	config_parser.h \
 	main.h \

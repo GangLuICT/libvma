@@ -35,12 +35,12 @@
 
 #include "utils/bullseye.h"
 #include "vlogger/vlogger.h"
-#include <vma/util/verbs_extra.h>
 #include <vma/util/sys_vars.h>
 #include "vma/dev/ib_ctx_handler.h"
+
+#include "vma/ib/base/verbs_extra.h"
 #include "vma/dev/time_converter_ib_ctx.h"
 #include "vma/dev/time_converter_ptp.h"
-#include "vma/util/verbs_extra.h"
 #include "util/valgrind.h"
 #include "vma/event/event_handler_manager.h"
 
