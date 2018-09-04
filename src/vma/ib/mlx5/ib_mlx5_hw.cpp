@@ -68,6 +68,8 @@ int vma_ib_mlx5dv_init_obj(vma_ib_mlx5dv_t *obj, uint64_t obj_type)
 static int vma_ib_mlx5dv_get_qp(struct ibv_qp *qp, vma_ib_mlx5dv_qp_t *mlx5_qp)
 {
 	int ret = 0;
+
+#if HAVE_DECL_IBV_MLX5_EXP_GET_QP_INFO
 	struct ibv_mlx5_qp_info ibv_qp_info;
 
 	ret = ibv_mlx5_exp_get_qp_info(qp, &ibv_qp_info);
@@ -85,12 +87,33 @@ static int vma_ib_mlx5dv_get_qp(struct ibv_qp *qp, vma_ib_mlx5dv_qp_t *mlx5_qp)
 	mlx5_qp->dv.bf.reg     = ibv_qp_info.bf.reg;
 	mlx5_qp->dv.bf.size    = ibv_qp_info.bf.size;
 
+#else
+	struct mlx5_qp *mqp = to_mqp(qp);
+
+	if ((mqp->sq.cur_post != 0) || (mqp->rq.head != 0)) {
+		return -ENODEV;
+	}
+
+	mlx5_qp->dv.dbrec      = mqp->gen_data.db;
+	mlx5_qp->dv.sq.buf     = (void *)((uintptr_t)mqp->buf.buf + mqp->sq.offset);
+	mlx5_qp->dv.sq.wqe_cnt = mqp->sq.wqe_cnt;
+	mlx5_qp->dv.sq.stride  = 1 << mqp->sq.wqe_shift;
+	mlx5_qp->dv.rq.buf     = (void *)((uintptr_t)mqp->buf.buf + mqp->rq.offset);
+	mlx5_qp->dv.rq.wqe_cnt = mqp->rq.wqe_cnt;
+	mlx5_qp->dv.rq.stride  = 1 << mqp->rq.wqe_shift;
+	mlx5_qp->dv.bf.reg     = mqp->gen_data.bf->reg;
+	mlx5_qp->dv.bf.size    = (mqp->gen_data.bf->uuarn > 0 ? mqp->gen_data.bf->buf_size : 0);
+
+#endif /* HAVE_DECL_IBV_MLX5_EXP_GET_QP_INFO */
+
 	return ret;
 }
 
 static int vma_ib_mlx5dv_get_cq(struct ibv_cq *cq, vma_ib_mlx5dv_cq_t *mlx5_cq)
 {
 	int ret = 0;
+
+#if HAVE_DECL_IBV_MLX5_EXP_GET_CQ_INFO
 	struct ibv_mlx5_cq_info ibv_cq_info;
 
 	ret = ibv_mlx5_exp_get_cq_info(cq, &ibv_cq_info);
@@ -103,6 +126,21 @@ static int vma_ib_mlx5dv_get_cq(struct ibv_cq *cq, vma_ib_mlx5dv_cq_t *mlx5_cq)
 	mlx5_cq->dv.cqe_cnt  = ibv_cq_info.cqe_cnt;
 	mlx5_cq->dv.cqe_size = ibv_cq_info.cqe_size;
 	mlx5_cq->dv.cqn      = ibv_cq_info.cqn;
+
+#else
+    struct mlx5_cq *mcq = to_mcq(cq);
+
+    if (mcq->cons_index != 0) {
+        return -ENODEV;
+    }
+
+    mlx5_cq->dv.buf      = mcq->active_buf->buf;
+	mlx5_cq->dv.dbrec    = mcq->dbrec;
+    mlx5_cq->dv.cqe_cnt  = mcq->ibv_cq.cqe + 1;
+    mlx5_cq->dv.cqe_size = mcq->cqe_sz;
+    mlx5_cq->dv.cqn      = mcq->cqn;
+
+#endif /* HAVE_DECL_IBV_MLX5_EXP_GET_CQ_INFO */
 
 	return ret;
 }

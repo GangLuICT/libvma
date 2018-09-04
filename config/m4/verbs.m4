@@ -137,6 +137,10 @@ if test "x$vma_cv_verbs" == x2; then
     CHECK_VERBS_ATTRIBUTE([IBV_EXP_QP_RATE_LIMIT], [infiniband/verbs_exp.h])
     CHECK_VERBS_ATTRIBUTE([IBV_EXP_QP_SUPPORT_BURST], [infiniband/verbs_exp.h])
 
+    AC_CHECK_DECLS([
+        ibv_mlx5_exp_get_qp_info,
+        ibv_mlx5_exp_get_cq_info],
+        [], [], [[#include <infiniband/mlx5_hw.h>]])
 
     #
     # Experimental Verbs CQ

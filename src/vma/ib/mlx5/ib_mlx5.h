@@ -55,6 +55,7 @@
 #define container_of(_ptr, _type, _member) (_type *)((char *)(_ptr) - offsetof(_type, _member))
 #endif
 
+
 typedef struct {
 	struct mlx5dv_obj dv;
 } vma_ib_mlx5dv_t;
@@ -75,5 +76,19 @@ typedef struct {
  * Get internal verbs information.
  */
 int vma_ib_mlx5dv_init_obj(vma_ib_mlx5dv_t *obj, uint64_t type);
+
+/* Completion queue */
+typedef struct vma_ib_mlx5_cq {
+    void               *cq_buf;
+    unsigned           cq_num;
+    unsigned           cq_ci;
+    unsigned           cqe_count;
+    unsigned           cqe_size;
+    unsigned           cqe_size_log;
+    volatile uint32_t  *dbrec;
+} vma_ib_mlx5_cq_t;
+
+int vma_ib_mlx5_get_cq(struct ibv_cq *cq, vma_ib_mlx5_cq_t *mlx5_cq);
+void vma_ib_mlx5_update_cq_ci(struct ibv_cq *cq, unsigned cq_ci);
 
 #endif /* SRC_VMA_IB_MLX5_H_ */

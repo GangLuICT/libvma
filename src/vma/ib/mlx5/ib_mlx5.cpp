@@ -34,4 +34,44 @@
 #include "config.h"
 #endif
 
+#include "vma/util/utils.h"
 #include "vma/ib/mlx5/ib_mlx5.h"
+
+
+int vma_ib_mlx5_get_cq(struct ibv_cq *cq, vma_ib_mlx5_cq_t *mlx5_cq)
+{
+    int ret = 0;
+    vma_ib_mlx5dv_t obj;
+    vma_ib_mlx5dv_cq_t dcq;
+
+    memset(&obj, 0, sizeof(obj));
+    memset(&dcq, 0, sizeof(dcq));
+
+    obj.dv.cq.in = cq;
+    obj.dv.cq.out = &dcq.dv;
+    ret = vma_ib_mlx5dv_init_obj(&obj, MLX5DV_OBJ_CQ);
+    if (ret != 0) {
+        return ret;
+    }
+
+    mlx5_cq->cq_num       = dcq.dv.cqn;
+    mlx5_cq->cq_ci        = 0;
+    mlx5_cq->cqe_count    = dcq.dv.cqe_cnt;
+    mlx5_cq->cqe_size     = dcq.dv.cqe_size;
+    mlx5_cq->cqe_size_log = ilog_2(dcq.dv.cqe_size);
+    mlx5_cq->dbrec        = dcq.dv.dbrec;
+
+    /* Move buffer forward for 128b CQE, so we would get pointer to the 2nd
+     * 64b when polling.
+     */
+    mlx5_cq->cq_buf       = (uint8_t *)dcq.dv.buf + dcq.dv.cqe_size - sizeof(struct mlx5_cqe64);
+
+    return 0;
+}
+
+void vma_ib_mlx5_update_cq_ci(struct ibv_cq *cq, unsigned cq_ci)
+{
+	struct mlx5_cq *mcq = to_mcq(cq);
+
+	mcq->cons_index = cq_ci;
+}
