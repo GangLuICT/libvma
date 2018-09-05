@@ -77,6 +77,29 @@ typedef struct {
  */
 int vma_ib_mlx5dv_init_obj(vma_ib_mlx5dv_t *obj, uint64_t type);
 
+/* Queue pair */
+typedef struct vma_ib_mlx5_qp {
+	uint32_t qpn;
+	struct {
+		volatile uint32_t *dbrec;
+		void *buf;
+		uint32_t wqe_cnt;
+		uint32_t stride;
+	} sq;
+	struct {
+		volatile uint32_t *dbrec;
+		void *buf;
+		uint32_t wqe_cnt;
+		uint32_t stride;
+		uint32_t head;
+		uint32_t tail;
+	} rq;
+	struct {
+		void *reg;
+		uint32_t size;
+	} bf;
+} vma_ib_mlx5_qp_t;
+
 /* Completion queue */
 typedef struct vma_ib_mlx5_cq {
     void               *cq_buf;
@@ -88,6 +111,7 @@ typedef struct vma_ib_mlx5_cq {
     volatile uint32_t  *dbrec;
 } vma_ib_mlx5_cq_t;
 
+int vma_ib_mlx5_get_qp(struct ibv_qp *qp, vma_ib_mlx5_qp_t *mlx5_qp);
 int vma_ib_mlx5_get_cq(struct ibv_cq *cq, vma_ib_mlx5_cq_t *mlx5_cq);
 void vma_ib_mlx5_update_cq_ci(struct ibv_cq *cq, unsigned cq_ci);
 

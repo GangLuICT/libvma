@@ -39,6 +39,18 @@
 
 #if defined(DEFINED_DIRECT_VERBS) && (DEFINED_DIRECT_VERBS == 3)
 
+static inline struct mlx5_qp *to_mqp(struct ibv_qp *ibqp)
+{
+	struct verbs_qp *vqp = (struct verbs_qp *)ibqp;
+
+	return container_of(vqp, struct mlx5_qp, verbs_qp);
+}
+
+static inline struct mlx5_cq *to_mcq(struct ibv_cq *ibcq)
+{
+	return container_of((struct ibv_cq_ex *)ibcq, struct mlx5_cq, ibv_cq);
+}
+
 #endif /* (DEFINED_DIRECT_VERBS == 3) */
 
 #endif /* SRC_VMA_IB_MLX5_DV_H_ */

@@ -71,6 +71,7 @@ static int vma_ib_mlx5dv_get_qp(struct ibv_qp *qp, vma_ib_mlx5dv_qp_t *mlx5_qp)
 
 #if HAVE_DECL_IBV_MLX5_EXP_GET_QP_INFO
 	struct ibv_mlx5_qp_info ibv_qp_info;
+	struct mlx5_qp *mqp = to_mqp(qp);
 
 	ret = ibv_mlx5_exp_get_qp_info(qp, &ibv_qp_info);
 	if (ret != 0) {
@@ -78,7 +79,9 @@ static int vma_ib_mlx5dv_get_qp(struct ibv_qp *qp, vma_ib_mlx5dv_qp_t *mlx5_qp)
 	}
 
 	mlx5_qp->dv.dbrec      = ibv_qp_info.dbrec;
-	mlx5_qp->dv.sq.buf     = ibv_qp_info.sq.buf;
+	mlx5_qp->dv.sq.buf     = (mqp->sq_buf_size ?
+			(void *)((uintptr_t)mqp->sq_buf.buf) : /* IBV_QPT_RAW_PACKET */
+			(void *)((uintptr_t)mqp->buf.buf + mqp->sq.offset));
 	mlx5_qp->dv.sq.wqe_cnt = ibv_qp_info.sq.wqe_cnt;
 	mlx5_qp->dv.sq.stride  = ibv_qp_info.sq.stride;
 	mlx5_qp->dv.rq.buf     = ibv_qp_info.rq.buf;
@@ -95,14 +98,17 @@ static int vma_ib_mlx5dv_get_qp(struct ibv_qp *qp, vma_ib_mlx5dv_qp_t *mlx5_qp)
 	}
 
 	mlx5_qp->dv.dbrec      = mqp->gen_data.db;
-	mlx5_qp->dv.sq.buf     = (void *)((uintptr_t)mqp->buf.buf + mqp->sq.offset);
+	mlx5_qp->dv.sq.buf     = (mqp->sq_buf_size ?
+			(void *)((uintptr_t)mqp->sq_buf.buf) : /* IBV_QPT_RAW_PACKET */
+			(void *)((uintptr_t)mqp->buf.buf + mqp->sq.offset));
 	mlx5_qp->dv.sq.wqe_cnt = mqp->sq.wqe_cnt;
 	mlx5_qp->dv.sq.stride  = 1 << mqp->sq.wqe_shift;
 	mlx5_qp->dv.rq.buf     = (void *)((uintptr_t)mqp->buf.buf + mqp->rq.offset);
 	mlx5_qp->dv.rq.wqe_cnt = mqp->rq.wqe_cnt;
 	mlx5_qp->dv.rq.stride  = 1 << mqp->rq.wqe_shift;
 	mlx5_qp->dv.bf.reg     = mqp->gen_data.bf->reg;
-	mlx5_qp->dv.bf.size    = (mqp->gen_data.bf->uuarn > 0 ? mqp->gen_data.bf->buf_size : 0);
+	mlx5_qp->dv.bf.size    = (mqp->gen_data.bf->uuarn > 0 ?
+			mqp->gen_data.bf->buf_size : 0);
 
 #endif /* HAVE_DECL_IBV_MLX5_EXP_GET_QP_INFO */
 

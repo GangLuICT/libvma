@@ -48,16 +48,16 @@ struct mlx5dv_qp {
 		void *buf;
 		uint32_t wqe_cnt;
 		uint32_t stride;
-	}sq;
+	} sq;
 	struct {
 		void *buf;
 		uint32_t wqe_cnt;
 		uint32_t stride;
-	}rq;
+	} rq;
 	struct {
 		void *reg;
 		uint32_t size;
-	}bf;
+	} bf;
 	uint64_t comp_mask;
 };
 
@@ -83,15 +83,15 @@ struct mlx5dv_obj {
 	struct {
 		struct ibv_qp *in;
 		struct mlx5dv_qp *out;
-	}qp;
+	} qp;
 	struct {
 		struct ibv_cq *in;
 		struct mlx5dv_cq *out;
-	}cq;
+	} cq;
 	struct {
 		struct ibv_exp_wq *in;
 		struct mlx5dv_rwq *out;
-	}rwq;
+	} rwq;
 };
 
 enum mlx5dv_obj_type {

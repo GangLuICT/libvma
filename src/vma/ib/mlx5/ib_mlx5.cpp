@@ -38,6 +38,39 @@
 #include "vma/ib/mlx5/ib_mlx5.h"
 
 
+int vma_ib_mlx5_get_qp(struct ibv_qp *qp, vma_ib_mlx5_qp_t *mlx5_qp)
+{
+    int ret = 0;
+    vma_ib_mlx5dv_t obj;
+    vma_ib_mlx5dv_qp_t dqp;
+
+    memset(&obj, 0, sizeof(obj));
+    memset(&dqp, 0, sizeof(dqp));
+
+    obj.dv.qp.in = qp;
+    obj.dv.qp.out = &dqp.dv;
+    ret = vma_ib_mlx5dv_init_obj(&obj, MLX5DV_OBJ_QP);
+    if (ret != 0) {
+        return ret;
+    }
+
+	mlx5_qp->qpn        = qp->qp_num;
+	mlx5_qp->sq.dbrec   = &dqp.dv.dbrec[MLX5_SND_DBR];
+	mlx5_qp->sq.buf     = dqp.dv.sq.buf;
+	mlx5_qp->sq.wqe_cnt = dqp.dv.sq.wqe_cnt;
+	mlx5_qp->sq.stride  = dqp.dv.sq.stride;
+	mlx5_qp->rq.dbrec   = &dqp.dv.dbrec[MLX5_RCV_DBR];
+	mlx5_qp->rq.buf     = dqp.dv.rq.buf;
+	mlx5_qp->rq.wqe_cnt = dqp.dv.rq.wqe_cnt;
+	mlx5_qp->rq.stride  = dqp.dv.rq.stride;
+	mlx5_qp->rq.head    = 0;
+	mlx5_qp->rq.tail    = 0;
+	mlx5_qp->bf.reg     = dqp.dv.bf.reg;
+	mlx5_qp->bf.size    = dqp.dv.bf.size;
+
+    return 0;
+}
+
 int vma_ib_mlx5_get_cq(struct ibv_cq *cq, vma_ib_mlx5_cq_t *mlx5_cq)
 {
     int ret = 0;
