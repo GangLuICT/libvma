@@ -165,4 +165,18 @@ static int vma_ib_mlx5dv_get_rwq(struct ibv_exp_wq *wq, vma_ib_mlx5dv_rwq_t *mlx
 	return ret;
 }
 
+unsigned* vma_ib_mlx5_get_rq_head(struct ibv_qp *qp)
+{
+	struct mlx5_qp *mqp = to_mqp(qp);
+
+	return &mqp->rq.head;
+}
+
+unsigned* vma_ib_mlx5_get_rq_tail(struct ibv_qp *qp)
+{
+	struct mlx5_qp *mqp = to_mqp(qp);
+
+	return &mqp->rq.tail;
+}
+
 #endif /* (DEFINED_DIRECT_VERBS == 2) */

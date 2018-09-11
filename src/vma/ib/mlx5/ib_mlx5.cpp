@@ -63,8 +63,8 @@ int vma_ib_mlx5_get_qp(struct ibv_qp *qp, vma_ib_mlx5_qp_t *mlx5_qp)
 	mlx5_qp->rq.buf     = dqp.dv.rq.buf;
 	mlx5_qp->rq.wqe_cnt = dqp.dv.rq.wqe_cnt;
 	mlx5_qp->rq.stride  = dqp.dv.rq.stride;
-	mlx5_qp->rq.head    = 0;
-	mlx5_qp->rq.tail    = 0;
+	mlx5_qp->rq.head    = vma_ib_mlx5_get_rq_head(qp);
+	mlx5_qp->rq.tail    = vma_ib_mlx5_get_rq_tail(qp);
 	mlx5_qp->bf.reg     = dqp.dv.bf.reg;
 	mlx5_qp->bf.size    = dqp.dv.bf.size;
 
