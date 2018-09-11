@@ -34,6 +34,8 @@
 #include "config.h"
 #endif
 
+#if defined(DEFINED_DIRECT_VERBS)
+
 #include "vma/util/utils.h"
 #include "vma/ib/mlx5/ib_mlx5.h"
 
@@ -101,10 +103,4 @@ int vma_ib_mlx5_get_cq(struct ibv_cq *cq, vma_ib_mlx5_cq_t *mlx5_cq)
 
     return 0;
 }
-
-void vma_ib_mlx5_update_cq_ci(struct ibv_cq *cq, unsigned cq_ci)
-{
-	struct mlx5_cq *mcq = to_mcq(cq);
-
-	mcq->cons_index = cq_ci;
-}
+#endif /* DEFINED_DIRECT_VERBS */

@@ -179,4 +179,11 @@ unsigned* vma_ib_mlx5_get_rq_tail(struct ibv_qp *qp)
 	return &mqp->rq.tail;
 }
 
+void vma_ib_mlx5_update_cq_ci(struct ibv_cq *cq, unsigned cq_ci)
+{
+	struct mlx5_cq *mcq = to_mcq(cq);
+
+	mcq->cons_index = cq_ci;
+}
+
 #endif /* (DEFINED_DIRECT_VERBS == 2) */

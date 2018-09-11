@@ -33,9 +33,10 @@
 #ifndef SRC_VMA_IB_MLX5_H_
 #define SRC_VMA_IB_MLX5_H_
 
+#if defined(DEFINED_DIRECT_VERBS)
+
 #include <infiniband/verbs.h>
 
-#if defined(DEFINED_DIRECT_VERBS)
 #if (DEFINED_DIRECT_VERBS == 2)
 #include <infiniband/mlx5_hw.h>
 #include "vma/ib/mlx5/ib_mlx5_hw.h"
@@ -45,7 +46,6 @@
 #else
 #error "Unsupported Direct VERBS parameter"
 #endif
-#endif /* DEFINED_DIRECT_VERBS */
 
 #ifndef offsetof
 #define offsetof(_type, _member) ((uintptr_t) &((_type *)0)->_member)
@@ -117,5 +117,7 @@ unsigned* vma_ib_mlx5_get_rq_tail(struct ibv_qp *qp);
 
 int vma_ib_mlx5_get_cq(struct ibv_cq *cq, vma_ib_mlx5_cq_t *mlx5_cq);
 void vma_ib_mlx5_update_cq_ci(struct ibv_cq *cq, unsigned cq_ci);
+
+#endif /* DEFINED_DIRECT_VERBS */
 
 #endif /* SRC_VMA_IB_MLX5_H_ */
