@@ -67,6 +67,7 @@ public:
 	virtual ~qp_mgr_eth_mlx5();
 	virtual void	up();
 	virtual void	down();
+	virtual void    post_recv_buffer(mem_buf_desc_t* p_mem_buf_desc); // Post for receive single mem_buf_desc
 	vma_ib_mlx5_qp_t m_mlx5_qp;
 protected:
 	void		trigger_completion_for_all_sent_packets();

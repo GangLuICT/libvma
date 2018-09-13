@@ -47,20 +47,6 @@ int vma_ib_mlx5dv_init_obj(vma_ib_mlx5dv_t *obj, uint64_t type)
 	return ret;
 }
 
-unsigned* vma_ib_mlx5_get_rq_head(struct ibv_qp *qp)
-{
-	struct mlx5_qp *mqp = to_mqp(qp);
-
-	return &mqp->rq.head;
-}
-
-unsigned* vma_ib_mlx5_get_rq_tail(struct ibv_qp *qp)
-{
-	struct mlx5_qp *mqp = to_mqp(qp);
-
-	return &mqp->rq.tail;
-}
-
 void vma_ib_mlx5_update_cq_ci(struct ibv_cq *cq, unsigned cq_ci)
 {
 	cq = cq;

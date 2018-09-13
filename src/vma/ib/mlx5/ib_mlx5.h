@@ -47,13 +47,8 @@
 #error "Unsupported Direct VERBS parameter"
 #endif
 
-#ifndef offsetof
-#define offsetof(_type, _member) ((uintptr_t) &((_type *)0)->_member)
-#endif
-
-#ifndef container_of
-#define container_of(_ptr, _type, _member) (_type *)((char *)(_ptr) - offsetof(_type, _member))
-#endif
+#include <utils/asm.h>
+#include <vma/util/vtypes.h>
 
 
 typedef struct {
@@ -77,9 +72,16 @@ typedef struct {
  */
 int vma_ib_mlx5dv_init_obj(vma_ib_mlx5dv_t *obj, uint64_t type);
 
+enum {
+   VMA_IB_MLX5_QP_FLAGS_USE_UNDERLAY = 0x01
+};
+
 /* Queue pair */
 typedef struct vma_ib_mlx5_qp {
+	struct ibv_qp *qp;
 	uint32_t qpn;
+	uint32_t flags;
+	struct ibv_qp_cap cap;
 	struct {
 		volatile uint32_t *dbrec;
 		void *buf;
@@ -91,8 +93,9 @@ typedef struct vma_ib_mlx5_qp {
 		void *buf;
 		uint32_t wqe_cnt;
 		uint32_t stride;
-		unsigned *head;
-		unsigned *tail;
+		uint32_t wqe_shift;
+		unsigned head;
+		unsigned tail;
 	} rq;
 	struct {
 		void *reg;
@@ -111,9 +114,8 @@ typedef struct vma_ib_mlx5_cq {
     volatile uint32_t  *dbrec;
 } vma_ib_mlx5_cq_t;
 
-int vma_ib_mlx5_get_qp(struct ibv_qp *qp, vma_ib_mlx5_qp_t *mlx5_qp);
-unsigned* vma_ib_mlx5_get_rq_head(struct ibv_qp *qp);
-unsigned* vma_ib_mlx5_get_rq_tail(struct ibv_qp *qp);
+int vma_ib_mlx5_get_qp(struct ibv_qp *qp, vma_ib_mlx5_qp_t *mlx5_qp, uint32_t flags = 0);
+int vma_ib_mlx5_post_recv(vma_ib_mlx5_qp_t *mlx5_qp, struct ibv_recv_wr *wr, struct ibv_recv_wr **bad_wr);
 
 int vma_ib_mlx5_get_cq(struct ibv_cq *cq, vma_ib_mlx5_cq_t *mlx5_cq);
 void vma_ib_mlx5_update_cq_ci(struct ibv_cq *cq, unsigned cq_ci);

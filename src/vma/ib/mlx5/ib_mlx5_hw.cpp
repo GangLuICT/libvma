@@ -80,7 +80,7 @@ static int vma_ib_mlx5dv_get_qp(struct ibv_qp *qp, vma_ib_mlx5dv_qp_t *mlx5_qp)
 
 	mlx5_qp->dv.dbrec      = ibv_qp_info.dbrec;
 	mlx5_qp->dv.sq.buf     = (mqp->sq_buf_size ?
-			(void *)((uintptr_t)mqp->sq_buf.buf) : /* IBV_QPT_RAW_PACKET */
+			(void *)((uintptr_t)mqp->sq_buf.buf) : /* IBV_QPT_RAW_PACKET or Underly QP */
 			(void *)((uintptr_t)mqp->buf.buf + mqp->sq.offset));
 	mlx5_qp->dv.sq.wqe_cnt = ibv_qp_info.sq.wqe_cnt;
 	mlx5_qp->dv.sq.stride  = ibv_qp_info.sq.stride;
@@ -99,7 +99,7 @@ static int vma_ib_mlx5dv_get_qp(struct ibv_qp *qp, vma_ib_mlx5dv_qp_t *mlx5_qp)
 
 	mlx5_qp->dv.dbrec      = mqp->gen_data.db;
 	mlx5_qp->dv.sq.buf     = (mqp->sq_buf_size ?
-			(void *)((uintptr_t)mqp->sq_buf.buf) : /* IBV_QPT_RAW_PACKET */
+			(void *)((uintptr_t)mqp->sq_buf.buf) : /* IBV_QPT_RAW_PACKET or Underly QP */
 			(void *)((uintptr_t)mqp->buf.buf + mqp->sq.offset));
 	mlx5_qp->dv.sq.wqe_cnt = mqp->sq.wqe_cnt;
 	mlx5_qp->dv.sq.stride  = 1 << mqp->sq.wqe_shift;
@@ -163,20 +163,6 @@ static int vma_ib_mlx5dv_get_rwq(struct ibv_exp_wq *wq, vma_ib_mlx5dv_rwq_t *mlx
 	mlx5_rwq->dv.stride  = (1 << rwq->rq.wqe_shift);
 
 	return ret;
-}
-
-unsigned* vma_ib_mlx5_get_rq_head(struct ibv_qp *qp)
-{
-	struct mlx5_qp *mqp = to_mqp(qp);
-
-	return &mqp->rq.head;
-}
-
-unsigned* vma_ib_mlx5_get_rq_tail(struct ibv_qp *qp)
-{
-	struct mlx5_qp *mqp = to_mqp(qp);
-
-	return &mqp->rq.tail;
 }
 
 void vma_ib_mlx5_update_cq_ci(struct ibv_cq *cq, unsigned cq_ci)
