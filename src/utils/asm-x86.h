@@ -45,7 +45,7 @@
 #define wmb()	 asm volatile("" ::: "memory")
 #define wc_wmb() asm volatile("sfence" ::: "memory")
 
-#define COPY_64B_NT(dst, src)		\
+#define COPY_64B_ASM(dst, src)		\
 	__asm__ __volatile__ (		\
 	" movdqa   (%1),%%xmm0\n"	\
 	" movdqa 16(%1),%%xmm1\n"	\
@@ -58,6 +58,16 @@
 	: : "r" (dst), "r" (src) : "memory");	\
 	dst += 8;			\
 	src += 8
+
+#define COPY_64B_NT(dst, src)    \
+	*dst++ = *src++;    \
+	*dst++ = *src++;    \
+	*dst++ = *src++;    \
+	*dst++ = *src++;    \
+	*dst++ = *src++;    \
+	*dst++ = *src++;    \
+	*dst++ = *src++;    \
+	*dst++ = *src++
 
 #if _BullseyeCoverage
     #pragma BullseyeCoverage off

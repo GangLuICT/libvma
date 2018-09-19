@@ -47,6 +47,8 @@
 	*dst++ = *src++;	\
 	*dst++ = *src++
 
+#define COPY_64B_ASM(dst, src) COPY_64B_NT(dst, src)
+
 #define mb()	asm volatile("dsb sy" ::: "memory")
 #define rmb()	asm volatile("dsb ld" ::: "memory")
 #define wmb()	asm volatile("dsb st" ::: "memory")

@@ -74,6 +74,81 @@ static inline uint64_t align_to_WQEBB_up(uint64_t val)
 	return ((val+4-1)>>2)<<2;
 }
 
+
+//! Copying src to BlueFlame register buffer by Write Combining cnt WQEBBs
+// Avoid using memcpy() to copy to BlueFlame page, since memcpy()
+// implementations may use move-string-buffer assembler instructions,
+// which do not guarantee order of copying.
+static void copy_bf_nt(uint64_t *bf_dst, uint64_t *src, int cnt)
+{
+	while (cnt--) {
+		COPY_64B_NT(bf_dst, src);
+	}
+}
+
+static void copy_bf_asm(uint64_t *bf_dst, uint64_t *src, int cnt)
+{
+	while (cnt--) {
+		COPY_64B_ASM(bf_dst, src);
+	}
+}
+
+//! Copying two data chunks in wrap around case to BlueFlame register buffer
+//  by Write Combining
+static void copy_bf2_nt(uint64_t* bf_dst, uint64_t* src_bottom, uint64_t* src_top, int cnt_bottom, int cnt_top)
+{
+	while (cnt_bottom--) {
+		COPY_64B_NT(bf_dst, src_bottom);
+	}
+	while (cnt_top--) {
+		COPY_64B_NT(bf_dst, src_top);
+	}
+}
+
+static void copy_bf2_asm(uint64_t* bf_dst, uint64_t* src_bottom, uint64_t* src_top, int cnt_bottom, int cnt_top)
+{
+	while (cnt_bottom--) {
+		COPY_64B_ASM(bf_dst, src_bottom);
+	}
+	while (cnt_top--) {
+		COPY_64B_ASM(bf_dst, src_top);
+	}
+}
+
+qp_mgr_eth_mlx5::qp_mgr_eth_mlx5(const ring_simple* p_ring,
+		const ib_ctx_handler* p_context, const uint8_t port_num,
+		struct ibv_comp_channel* p_rx_comp_event_channel,
+		const uint32_t tx_num_wr, const uint16_t vlan, bool call_configure):
+	qp_mgr_eth(p_ring, p_context, port_num, p_rx_comp_event_channel, tx_num_wr, vlan, false)
+	,m_sq_wqe_idx_to_wrid(NULL)
+	,m_sq_wqes(NULL)
+	,m_sq_wqe_hot(NULL)
+	,m_sq_wqes_end(NULL)
+	,m_sq_db(NULL)
+	,m_sq_bf_reg(NULL)
+	,m_qp_num(0)
+	,m_sq_wqe_hot_index(0)
+	,m_sq_bf_offset(0)
+	,m_sq_bf_buf_size(0)
+	,m_sq_wqe_counter(0)
+	,m_dm_enabled(0)
+{
+	if (call_configure && configure(p_rx_comp_event_channel)) {
+		throw_vma_exception("failed creating qp_mgr_eth");
+	}
+
+	copy_bf = &copy_bf_asm;
+	copy_bf2 = &copy_bf2_asm;
+	if (mce_sys_var::HYPER_KVM == safe_mce_sys().hypervisor) {
+		copy_bf = &copy_bf_nt;
+		copy_bf2 = &copy_bf2_nt;
+	}
+
+	memset(&m_mlx5_qp, 0, sizeof(m_mlx5_qp));
+
+	qp_logfunc("m_p_cq_mgr_tx= %p", m_p_cq_mgr_tx);
+}
+
 //
 void qp_mgr_eth_mlx5::init_sq()
 {
@@ -127,33 +202,6 @@ void qp_mgr_eth_mlx5::init_sq()
 
 	qp_logfunc("%p allocated for %d QPs sq_wqes:%p sq_wqes_end: %p and configured %d WRs BlueFlame: %p buf_size: %d offset: %d",
 			m_qp, m_qp_num, m_sq_wqes, m_sq_wqes_end,  m_tx_num_wr, m_sq_bf_reg, m_sq_bf_buf_size, m_sq_bf_offset);
-}
-
-qp_mgr_eth_mlx5::qp_mgr_eth_mlx5(const ring_simple* p_ring,
-		const ib_ctx_handler* p_context, const uint8_t port_num,
-		struct ibv_comp_channel* p_rx_comp_event_channel,
-		const uint32_t tx_num_wr, const uint16_t vlan, bool call_configure):
-	qp_mgr_eth(p_ring, p_context, port_num, p_rx_comp_event_channel, tx_num_wr, vlan, false)
-	,m_sq_wqe_idx_to_wrid(NULL)
-	,m_sq_wqes(NULL)
-	,m_sq_wqe_hot(NULL)
-	,m_sq_wqes_end(NULL)
-	,m_sq_db(NULL)
-	,m_sq_bf_reg(NULL)
-	,m_qp_num(0)
-	,m_sq_wqe_hot_index(0)
-	,m_sq_bf_offset(0)
-	,m_sq_bf_buf_size(0)
-	,m_sq_wqe_counter(0)
-	,m_dm_enabled(0)
-{
-	if (call_configure && configure(p_rx_comp_event_channel)) {
-		throw_vma_exception("failed creating qp_mgr_eth");
-	}
-
-	memset(&m_mlx5_qp, 0, sizeof(m_mlx5_qp));
-
-	qp_logfunc("m_p_cq_mgr_tx= %p", m_p_cq_mgr_tx);
 }
 
 void qp_mgr_eth_mlx5::up()
@@ -265,29 +313,6 @@ inline void qp_mgr_eth_mlx5::set_signal_in_next_send_wqe()
 {
 	volatile struct mlx5_wqe64 *wqe = &(*m_sq_wqes)[m_sq_wqe_counter & (m_tx_num_wr - 1)];
 	wqe->ctrl.data[2] = htonl(8);
-}
-
-//! Copying src to BlueFlame register buffer by Write Combining cnt WQEBBs
-static inline void copy_bf(uint64_t *bf_dst, uint64_t *src, int cnt)
-{
-	// Avoid using memcpy() to copy to BlueFlame page, since memcpy()
-	// implementations may use move-string-buffer assembler instructions,
-	// which do not guarantee order of copying.
-	while (cnt--) {
-		COPY_64B_NT(bf_dst, src);
-	}
-}
-
-//! Copying two data chunks in wrap around case to BlueFlame register buffer
-//  by Write Combining
-static inline void copy_bf2(uint64_t* bf_dst, uint64_t* src_bottom, uint64_t* src_top, int cnt_bottom, int cnt_top)
-{
-	while (cnt_bottom--) {
-		COPY_64B_NT(bf_dst, src_bottom);
-	}
-	while (cnt_top--) {
-		COPY_64B_NT(bf_dst, src_top);
-	}
 }
 
 inline void qp_mgr_eth_mlx5::send_by_bf(uint64_t* addr, int num_wqebb)
