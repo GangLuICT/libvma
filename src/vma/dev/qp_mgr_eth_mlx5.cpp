@@ -238,6 +238,7 @@ qp_mgr_eth_mlx5::~qp_mgr_eth_mlx5()
 	}
 }
 
+#ifndef DEFINED_SOCKETXTREME
 void qp_mgr_eth_mlx5::post_recv_buffer(mem_buf_desc_t* p_mem_buf_desc)
 {
 	if (m_n_sysvar_rx_prefetch_bytes_before_poll) {
@@ -285,6 +286,7 @@ void qp_mgr_eth_mlx5::post_recv_buffer(mem_buf_desc_t* p_mem_buf_desc)
 		m_curr_rx_wr++;
 	}
 }
+#endif
 
 cq_mgr* qp_mgr_eth_mlx5::init_rx_cq_mgr(struct ibv_comp_channel* p_rx_comp_event_channel)
 {
