@@ -84,7 +84,6 @@ public:
 	}
 	virtual void adapt_cq_moderation() {}
 
-#ifdef DEFINED_SOCKETXTREME
 	virtual int socketxtreme_poll(struct vma_completion_t *vma_completions,
 			unsigned int ncompletions, int flags) {
 		NOT_IN_USE(vma_completions);
@@ -92,7 +91,6 @@ public:
 		NOT_IN_USE(flags);
 		return 0;
 	}
-#endif // DEFINED_SOCKETXTREME
 
 	virtual int modify_ratelimit(struct vma_rate_limit_t &rate_limit) {
 		NOT_IN_USE(rate_limit);

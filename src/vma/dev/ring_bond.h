@@ -80,9 +80,7 @@ public:
 	virtual bool 		get_hw_dummy_send_support(ring_user_id_t id, vma_ibv_send_wr* p_send_wqe);
 	virtual int		modify_ratelimit(struct vma_rate_limit_t &rate_limit);
 	virtual bool		is_ratelimit_supported(struct vma_rate_limit_t &rate_limit);
-#ifdef DEFINED_SOCKETXTREME		
 	int 			socketxtreme_poll(struct vma_completion_t *vma_completions, unsigned int ncompletions, int flags);
-#endif // DEFINED_SOCKETXTREME		
 	virtual void    slave_create(int if_index) = 0;
 	virtual void    slave_destroy(int if_index);
 protected:
