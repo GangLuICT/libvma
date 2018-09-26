@@ -121,6 +121,8 @@ qp_mgr_eth_mlx5::qp_mgr_eth_mlx5(const ring_simple* p_ring,
 		const uint32_t tx_num_wr, const uint16_t vlan, bool call_configure):
 	qp_mgr_eth(p_ring, p_context, port_num, p_rx_comp_event_channel, tx_num_wr, vlan, false)
 	,m_sq_wqe_idx_to_wrid(NULL)
+	,m_rq_wqe_counter(0)
+	,m_rq_wqe_idx_to_wrid(NULL)
 	,m_sq_wqes(NULL)
 	,m_sq_wqe_hot(NULL)
 	,m_sq_wqes_end(NULL)
@@ -238,7 +240,6 @@ qp_mgr_eth_mlx5::~qp_mgr_eth_mlx5()
 	}
 }
 
-#ifndef DEFINED_SOCKETXTREME
 void qp_mgr_eth_mlx5::post_recv_buffer(mem_buf_desc_t* p_mem_buf_desc)
 {
 	if (m_n_sysvar_rx_prefetch_bytes_before_poll) {
@@ -286,17 +287,18 @@ void qp_mgr_eth_mlx5::post_recv_buffer(mem_buf_desc_t* p_mem_buf_desc)
 		m_curr_rx_wr++;
 	}
 }
-#endif
 
 cq_mgr* qp_mgr_eth_mlx5::init_rx_cq_mgr(struct ibv_comp_channel* p_rx_comp_event_channel)
 {
 	m_rx_num_wr = align32pow2(m_rx_num_wr);
 
-	m_rq_wqe_idx_to_wrid = (uint64_t*)mmap(NULL, m_rx_num_wr * sizeof(*m_rq_wqe_idx_to_wrid), PROT_READ | PROT_WRITE, MAP_ANONYMOUS | MAP_PRIVATE, -1, 0);
+	m_rq_wqe_idx_to_wrid = (uint64_t*)mmap(NULL, m_rx_num_wr * sizeof(*m_rq_wqe_idx_to_wrid),
+			PROT_READ | PROT_WRITE, MAP_ANONYMOUS | MAP_PRIVATE, -1, 0);
 	if (m_rq_wqe_idx_to_wrid == MAP_FAILED) {
 		qp_logerr("Failed allocating m_rq_wqe_idx_to_wrid (errno=%d %m)", errno);
 		return NULL;
 	}
+	m_p_rq_wqe_idx_to_wrid = m_rq_wqe_idx_to_wrid;
 
 #ifdef DEFINED_SOCKETXTREME
 	return new cq_mgr(m_p_ring, m_p_ib_ctx_handler, m_rx_num_wr, p_rx_comp_event_channel, true);

@@ -67,14 +67,16 @@ public:
 	virtual ~qp_mgr_eth_mlx5();
 	virtual void	up();
 	virtual void	down();
-#ifndef DEFINED_SOCKETXTREME
 	virtual void    post_recv_buffer(mem_buf_desc_t* p_mem_buf_desc); // Post for receive single mem_buf_desc
-#endif
-	vma_ib_mlx5_qp_t m_mlx5_qp;
+#ifndef DEFINED_SOCKETXTREME
+	vma_ib_mlx5_qp_t    m_mlx5_qp;
+#endif // DEFINED_SOCKETXTREME
 protected:
 	void		trigger_completion_for_all_sent_packets();
 	void		init_sq();
-	uint64_t*	m_sq_wqe_idx_to_wrid;
+	uint64_t*   m_sq_wqe_idx_to_wrid;
+	uint64_t    m_rq_wqe_counter;
+	uint64_t*   m_rq_wqe_idx_to_wrid;
 
 private:
 	cq_mgr*		init_rx_cq_mgr(struct ibv_comp_channel* p_rx_comp_event_channel);
