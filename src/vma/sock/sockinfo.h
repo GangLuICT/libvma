@@ -138,12 +138,7 @@ public:
 	virtual int* get_rings_fds(int &res_length);
 	virtual int get_rings_num();
 	virtual int get_socket_network_ptr(void *ptr, uint16_t &len);
-
-#ifdef DEFINED_SOCKETXTREME
 	virtual bool check_rings() {return m_p_rx_ring ? true: false;}
-#else
-        virtual bool check_rings() {return true;}
-#endif /* DEFINED_SOCKETXTREME */
 	virtual void statistics_print(vlog_levels_t log_level = VLOG_DEBUG);
 protected:
 	bool			m_b_closed;
